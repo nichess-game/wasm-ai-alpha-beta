@@ -303,8 +303,7 @@ float agent1::Agent1::positionValueFromString(std::string encodedPosition, Playe
 
 EMSCRIPTEN_KEEPALIVE
 float agent1::Agent1::quiescenceSearch(nichess_wrapper::GameWrapper& gameWrapper, bool maximizingPlayer, Player startingPlayer) {
-  if(this->numNodesSearched % this->numNodesBeforeTimeCheck == 0 &&
-      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - this->startTime).count() >= this->maxThinkingTime) {
+  if(this->numNodesSearched >= this->numNodesToSearch) {
     this->abortSearch = true;
     return 0;
   }
@@ -357,8 +356,7 @@ float agent1::Agent1::quiescenceSearch(nichess_wrapper::GameWrapper& gameWrapper
 
 EMSCRIPTEN_KEEPALIVE
 float agent1::Agent1::alphabeta(nichess_wrapper::GameWrapper& gameWrapper, float alpha, float beta, int depth, bool maximizingPlayer, Player startingPlayer) {
-  if(this->numNodesSearched % this->numNodesBeforeTimeCheck == 0 &&
-      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - this->startTime).count() >= this->maxThinkingTime) {
+  if(this->numNodesSearched >= this->numNodesToSearch) {
     this->abortSearch = true;
     return 0;
   }
@@ -471,17 +469,18 @@ PlayerAction agent1::Agent1::runAlphaBetaSearch(nichess_wrapper::GameWrapper& ga
 }
 
 EMSCRIPTEN_KEEPALIVE
-PlayerAction agent1::Agent1::computeAction(nichess_wrapper::GameWrapper& gameWrapper, int maxThinkingTime) {
-  assert(maxThinkingTime > 300);
-  this->startTime = std::chrono::system_clock::now();
+PlayerAction agent1::Agent1::computeAction(nichess_wrapper::GameWrapper& gameWrapper, int numNodesToSearch) {
+  assert(numNodesToSearch > 300);
   this->numNodesSearched = 0;
+  this->numNodesToSearch = numNodesToSearch;
   this->abortSearch = false;
-  this->maxThinkingTime = maxThinkingTime;
   PlayerAction allTimeBestAction, currentBestAction;
   allTimeBestAction = PlayerAction(MOVE_SKIP, MOVE_SKIP, ABILITY_SKIP, ABILITY_SKIP);
   int i = 1;
   while(true) {
     std::cout << "Searching with max depth " << i << "\n";
+    std::cout << "nodes searched: " << this->numNodesSearched << "\n";
+    std::cout << "nodes to search: " << this->numNodesToSearch << "\n";
     currentBestAction = runAlphaBetaSearch(gameWrapper, i);
     if(!this->abortSearch) { // only save best action if search was completed
       allTimeBestAction = currentBestAction;

@@ -19,6 +19,39 @@ EMSCRIPTEN_KEEPALIVE
 float pieceTypeToValueMultiplier(PieceType pt) {
   switch(pt) {
     case P1_KING:
+      return 10;
+    case P1_MAGE:
+      return  10; 
+    case P1_PAWN:
+      return 1;
+    case P1_WARRIOR:
+      return 5;
+    case P1_ASSASSIN:
+      return 5;
+    case P2_KING:
+      return 10;
+    case P2_MAGE:
+      return 10;
+    case P2_PAWN:
+      return 1;
+    case P2_WARRIOR:
+      return 5;
+    case P2_ASSASSIN:
+      return 5;
+    case NO_PIECE:
+      return 0;
+    default:
+      return 0;
+  }
+}
+/*
+ * Used for dead pieces. Reason: Some pieces (King, Assassin) getting damaged isn't too important, but it's very bad
+ * if they die.
+ */
+EMSCRIPTEN_KEEPALIVE
+float pieceTypeToValueMultiplier2(PieceType pt) {
+  switch(pt) {
+    case P1_KING:
       return 1000;
     case P1_MAGE:
       return  10; 
@@ -27,7 +60,7 @@ float pieceTypeToValueMultiplier(PieceType pt) {
     case P1_WARRIOR:
       return 5;
     case P1_ASSASSIN:
-      return 15;
+      return 30;
     case P2_KING:
       return 1000;
     case P2_MAGE:
@@ -37,7 +70,7 @@ float pieceTypeToValueMultiplier(PieceType pt) {
     case P2_WARRIOR:
       return 5;
     case P2_ASSASSIN:
-      return 15;
+      return 30;
     case NO_PIECE:
       return 0;
     default:
@@ -220,8 +253,8 @@ std::vector<std::vector<float>> createPieceTypeToIndexToSquareValue() {
   pieceTypeToIndexToSquareValue[P2_PAWN] = indexToP2PawnSquareValue;
 
   // p2 warrior
-  mostValuableX = 5;
-  mostValuableY = 5;
+  mostValuableX = 2;
+  mostValuableY = 2;
   std::vector<float> indexToP2WarriorSquareValue(NUM_ROWS * NUM_COLUMNS);
   for(int y = 0; y < NUM_ROWS; y++) {
     for(int x = 0; x < NUM_COLUMNS; x++) {
@@ -274,7 +307,7 @@ float agent1::Agent1::positionValue(nichess_wrapper::GameWrapper& gameWrapper, P
   std::vector<Piece*> p1Pieces = gameWrapper.game->getAllPiecesByPlayer(PLAYER_1);
   for(Piece* p : p1Pieces) {
     if(p->healthPoints <= 0) {
-      retval -= pieceTypeToValueMultiplier(p->type) * 100;
+      retval -= pieceTypeToValueMultiplier2(p->type) * 100;
       continue;
     }
     retval += pieceTypeToIndexToSquareValue[p->type][p->squareIndex] * pieceTypeToValueMultiplier(p->type) * p->healthPoints;
@@ -282,7 +315,7 @@ float agent1::Agent1::positionValue(nichess_wrapper::GameWrapper& gameWrapper, P
   std::vector<Piece*> p2Pieces = gameWrapper.game->getAllPiecesByPlayer(PLAYER_2);
   for(Piece* p : p2Pieces) {
     if(p->healthPoints <= 0) {
-      retval += pieceTypeToValueMultiplier(p->type) * 100;
+      retval += pieceTypeToValueMultiplier2(p->type) * 100;
       continue;
     }
     retval -= pieceTypeToIndexToSquareValue[p->type][p->squareIndex] * pieceTypeToValueMultiplier(p->type) * p->healthPoints;
@@ -292,6 +325,9 @@ float agent1::Agent1::positionValue(nichess_wrapper::GameWrapper& gameWrapper, P
   return m * retval;
 }
 
+/*
+ * Used for testing
+ */
 EMSCRIPTEN_KEEPALIVE
 float agent1::Agent1::positionValueFromString(std::string encodedPosition, Player player) {
   GameCache gameCache = GameCache();
@@ -362,8 +398,8 @@ float agent1::Agent1::alphabeta(nichess_wrapper::GameWrapper& gameWrapper, float
   }
 			
   if(depth == 0 || gameWrapper.game->gameOver()) {
-    //return positionValue(gameWrapper, startingPlayer);
-    return quiescenceSearch(gameWrapper, !maximizingPlayer, startingPlayer);
+    return positionValue(gameWrapper, startingPlayer);
+    //return quiescenceSearch(gameWrapper, !maximizingPlayer, startingPlayer);
   }
   if(maximizingPlayer) {
     std::vector<PlayerAction> ala = gameWrapper.game->usefulLegalActions();
@@ -456,7 +492,6 @@ PlayerAction agent1::Agent1::runAlphaBetaSearch(nichess_wrapper::GameWrapper& ga
     }
   }
   std::cout << "Number of nodes explored: " << numNodesSearched << "\n";
-  /*
   std::cout << "Best actions and their values:\n";
   for(ActionValue av: bestActionValues) {
     std::cout << "Action:\n";
@@ -464,7 +499,6 @@ PlayerAction agent1::Agent1::runAlphaBetaSearch(nichess_wrapper::GameWrapper& ga
     std::cout << "Value:\n";
     std::cout << av.value << "\n";
   }
-  */
   return bestAction;
 }
 

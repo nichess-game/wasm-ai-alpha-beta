@@ -15,7 +15,8 @@
 EXTERN EMSCRIPTEN_KEEPALIVE
 int computeAIAction(char* gameState) {
   GameCache gameCache = GameCache();
-  nichess_wrapper::GameWrapper gw = nichess_wrapper::GameWrapper(gameCache);
+  auto agentCache = nichess_wrapper::AgentCache();
+  nichess_wrapper::GameWrapper gw = nichess_wrapper::GameWrapper(gameCache, agentCache);
   gw.game->boardFromString(gameState);
   agent1::Agent1 agent = agent1::Agent1();
   nichess::PlayerAction pa = agent.computeAction(gw, 1000000);

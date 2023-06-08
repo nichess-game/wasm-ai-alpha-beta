@@ -80,6 +80,7 @@ float agent1::Agent1::alphabeta(nichess_wrapper::GameWrapper& gameWrapper, float
     //return quiescenceSearch(gameWrapper, !maximizingPlayer, startingPlayer);
   }
   if(maximizingPlayer) {
+    //std::vector<PlayerAction> ala = gameWrapper.greedyLegalActions();
     std::vector<PlayerAction> ala = gameWrapper.game->usefulLegalActions();
     float value = -std::numeric_limits<float>::max();
     for(PlayerAction pa : ala) {
@@ -95,6 +96,7 @@ float agent1::Agent1::alphabeta(nichess_wrapper::GameWrapper& gameWrapper, float
     }
     return value;
   } else {
+    //std::vector<PlayerAction> ala = gameWrapper.greedyLegalActions();
     std::vector<PlayerAction> ala = gameWrapper.game->usefulLegalActions();
     float value = std::numeric_limits<float>::max();
     for(PlayerAction pa : ala) {
@@ -128,6 +130,7 @@ bool compareActionValue(ActionValue av1, ActionValue av2) {
 
 EMSCRIPTEN_KEEPALIVE
 PlayerAction agent1::Agent1::runAlphaBetaSearch(nichess_wrapper::GameWrapper& gameWrapper, int searchDepth) {
+  //std::vector<PlayerAction> ala = gameWrapper.greedyLegalActions();
   std::vector<PlayerAction> ala = gameWrapper.game->usefulLegalActions();
   float bestValue = -std::numeric_limits<float>::max();
   PlayerAction bestAction = ala[0];

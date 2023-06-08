@@ -19,7 +19,7 @@ int computeAIAction(char* gameState) {
   nichess_wrapper::GameWrapper gw = nichess_wrapper::GameWrapper(gameCache, agentCache);
   gw.game->boardFromString(gameState);
   agent1::Agent1 agent = agent1::Agent1();
-  nichess::PlayerAction pa = agent.computeAction(gw, 1000000);
+  nichess::PlayerAction pa = agent.computeAction(gw, 500000);
   // Returning arrays in WASM is difficult.
   // Instead, this returns the PlayerAction as a single 9 digit int in form:
   // 1 moveSrcIdx moveDstIdx abilitySrcIdx abilityDstIdx

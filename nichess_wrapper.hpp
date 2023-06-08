@@ -24,6 +24,7 @@ class GameWrapper {
 
     GameWrapper(GameCache& gameCache, AgentCache& agentCache);
     std::vector<PlayerAction> usefulLegalActionsWithoutMoves();
+    std::vector<PlayerAction> greedyLegalActions();
     float positionValue(Player player);
 
 };
